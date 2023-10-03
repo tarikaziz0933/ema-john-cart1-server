@@ -8,8 +8,6 @@ require('dotenv').config()
 app.use(cors());
 app.use(express.json());
 
-//user: ema-john
-//pass: 2ncYZp3AeUgAXXes
 console.log(process.env.DB_USER);
 console.log(process.env.DB_PASSWORD);
 
