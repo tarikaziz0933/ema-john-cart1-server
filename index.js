@@ -1,15 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config()
 
+//middleware
 app.use(cors());
 app.use(express.json());
 
-//user: ema-john
-//pass: 2ncYZp3AeUgAXXes
 console.log(process.env.DB_USER);
 console.log(process.env.DB_PASSWORD);
 
@@ -29,7 +28,20 @@ async function run() {
         const productCollection = client.db('emaJohnDb').collection('products');
 
         app.get('/products', async (req, res) => {
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
+            console.log(page, size);
             const query = {};
+            const cursor = productCollection.find(query);
+            const products = await cursor.skip(page * size).limit(size).toArray();
+            const count = await productCollection.estimatedDocumentCount();
+            res.send({ count, products });
+        })
+
+        app.post('/productsByIds', async (req, res) => {
+            const ids = req.body;
+            const objectIds = ids.map(id => new ObjectId(id))
+            const query = { _id: { $in: objectIds } };
             const cursor = productCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
